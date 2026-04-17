@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, 
 import { ArrowRight } from 'lucide-react';
 import { servicesData } from '../../data/services';
 
-export const Services: React.FC = () => {
+export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const activeSlideRef = useRef(0); // Synchronous tracking of active text slide
   const targetSlideRef = useRef(0); // Tracks the intended destination based on scroll
@@ -52,6 +52,7 @@ export const Services: React.FC = () => {
 
       await Promise.all(loadPromises);
       setIsReady(true);
+      if (onReady) onReady();
       
       const canvas = canvasRef.current;
       if (canvas) {

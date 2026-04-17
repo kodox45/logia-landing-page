@@ -188,7 +188,7 @@ export const Methodology: React.FC = () => {
                 scale: isTitleMinimized ? 0.6 : 1,
                 opacity: 1 
               }}
-              style={{ willChange: "transform", transformZ: 0 }}
+              style={{ willChange: "transform" }}
               transition={{ type: "spring", stiffness: 90, damping: 25 }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-normal text-white mb-6 md:mb-8 tracking-tight leading-[1.1] origin-top text-balance"
             >
