@@ -54,7 +54,7 @@ export const Contact: React.FC = () => {
               viewport={{ once: true }}
               className="dna-glass-card rounded-[2.5rem] p-8 md:p-12"
             >
-              <form className="space-y-8">
+              <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-[10px] font-mono font-bold text-white/30 uppercase tracking-widest ml-1">Company Name</label>

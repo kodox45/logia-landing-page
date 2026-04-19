@@ -6,11 +6,13 @@ export const Market: React.FC = () => {
     <section id="market" className="py-32 relative z-10 overflow-hidden bg-brand-bg">
       {/* Background Image with Brightened Vignette */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="/market.png" 
-          alt="Market Background" 
+        <img
+          src="/market.png"
+          alt="Market Background"
           className="w-full h-full object-cover opacity-60"
           referrerPolicy="no-referrer"
+          loading="lazy"
+          decoding="async"
         />
         {/* Brighter Vignette / Seamless Blending Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-brand-bg via-transparent/20 to-brand-bg/80" />
@@ -40,11 +42,13 @@ export const Market: React.FC = () => {
           >
             {/* Full Background Image */}
             <div className="absolute inset-0 z-0">
-              <img 
-                src="/enterprise.png" 
-                alt="Enterprise Scale" 
+              <img
+                src="/enterprise.png"
+                alt="Enterprise Scale"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
               />
               {/* Dark Overlay for Contrast */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/90" />
@@ -85,11 +89,13 @@ export const Market: React.FC = () => {
           >
             {/* Full Background Image */}
             <div className="absolute inset-0 z-0">
-              <img 
-                src="/smb.png" 
-                alt="SMB Scale" 
+              <img
+                src="/smb.png"
+                alt="SMB Scale"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
               />
               {/* Dark Overlay for Contrast */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/90" />

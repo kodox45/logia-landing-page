@@ -7,10 +7,26 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
+    let prevScrolled = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60);
+      // passive listener fires on every pixel — gate the setState behind a single
+      // rAF so React reconciles at most once per rendered frame, not 100+ times/s.
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const shouldBeScrolled = window.scrollY > 60;
+          if (shouldBeScrolled !== prevScrolled) {
+            setIsScrolled(shouldBeScrolled);
+            prevScrolled = shouldBeScrolled;
+          }
+          ticking = false;
+        });
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

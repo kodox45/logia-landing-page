@@ -56,7 +56,7 @@ export const Hero: React.FC = memo(() => {
           muted 
           loop 
           playsInline
-          preload="auto"
+          preload="metadata"
         >
           <source src="/background-cut2.mp4" type="video/mp4" />
         </video>

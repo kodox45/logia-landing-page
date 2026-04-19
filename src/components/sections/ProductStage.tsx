@@ -87,11 +87,13 @@ const ProductCard: React.FC<{ product: ProductData; index: number }> = ({ produc
       <div className={`lg:w-[45%] relative overflow-hidden bg-brand-darker/40 border-white/5 ${isEven ? 'lg:border-l' : 'lg:border-r lg:order-1'}`}>
         {media && (
           <div className="absolute inset-0">
-            <img 
-              src={media.url} 
-              alt={media.alt} 
+            <img
+              src={media.url}
+              alt={media.alt}
               className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-1000 scale-105 group-hover:scale-100"
               referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
             />
             {/* Overlays */}
             <div className={`absolute inset-0 bg-gradient-to-t from-brand-bg via-transparent to-transparent lg:bg-gradient-to-r ${isEven ? 'lg:from-brand-bg/40' : 'lg:to-brand-bg/40'}`} />

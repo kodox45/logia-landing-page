@@ -87,10 +87,11 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
     let time = 0;
     
     const render = () => {
-      // Don't render if not visible!
+      // Don't render if not visible — and crucially, don't re-queue the RAF.
+      // The effect re-runs when isInView becomes true (it's in the dep array),
+      // which calls render() again and restarts the loop from there.
       if (!isInView) {
-         rafId = requestAnimationFrame(render);
-         return;
+        return;
       }
 
       const progress = scrollProgress.get();
@@ -145,18 +146,27 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
       rafId = requestAnimationFrame(render);
     };
 
+    // Debounce resize: without this, dragging the browser edge triggers 50+
+    // canvas clears per second. 150ms wait ensures we only resize once the
+    // user has stopped, eliminating resize jank entirely.
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      // Use higher DPI for crispness on retina displays if needed, or stick to simple
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }, 150);
     };
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    // Set initial size immediately (no debounce needed on first run)
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     render();
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
       cancelAnimationFrame(rafId);
     };
   }, [particles, scrollProgress, isInView]);

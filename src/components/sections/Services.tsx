@@ -10,6 +10,9 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   const animationRafId = useRef<number | null>(null); // To cancel ongoing animations
   
   const [isReady, setIsReady] = useState(false);
+  // Ref mirrors isReady so the useMotionValueEvent callback always sees the current value
+  // without depending on React's render cycle (avoids stale closure on slow devices).
+  const isReadyRef = useRef(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,10 +28,10 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   });
 
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
-  const progressBarWidth = useSpring(
-    useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
-    springConfig
-  );
+  // Spring must operate on a numeric MotionValue; applying it directly to the string
+  // transform output causes silent spring interpolation failure (NaN).
+  const progressSpring = useSpring(scrollYProgress, springConfig);
+  const progressBarWidth = useTransform(progressSpring, [0, 1], ["0%", "100%"]);
 
   // Preload images
   useEffect(() => {
@@ -52,6 +55,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
       // 1. CRITICAL PATH: Load ONLY the first frame to unblock the UI immediately
       await loadImage(framePaths[0], 1);
       
+      isReadyRef.current = true;
       setIsReady(true);
       if (onReady) onReady();
       
@@ -87,9 +91,12 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
 
     preloadImages();
     
-    // Cleanup on unmount
+    // Cleanup on unmount: cancel any running RAF and release all Image objects so
+    // the browser can GC the ~17MB of decoded frame data.
     return () => {
         if (animationRafId.current !== null) cancelAnimationFrame(animationRafId.current);
+        images.current.forEach(img => { img.src = ''; });
+        images.current = [];
     };
   }, []);
 
@@ -190,7 +197,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   };
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (!isReady) return;
+    if (!isReadyRef.current) return;
 
     // 4. Target-State Hysteresis Logic
     // We check absolute scroll boundaries instead of scroll direction. 
