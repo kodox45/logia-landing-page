@@ -119,9 +119,11 @@ export const ProductStage: React.FC = () => {
         style={{ clipPath: 'inset(-100% -100% 50% -100%)' }}
       />
       
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-accent/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-accent/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Glows — wrapped to prevent horizontal overflow on mobile */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-accent/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-accent/5 rounded-full blur-[120px]" />
+      </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
