@@ -9,6 +9,19 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ isLoading }) => {
   const [internalLoading, setInternalLoading] = useState(true);
   const [isFadingBg, setIsFadingBg] = useState(false);
 
+  // Manage body scroll lock cleanly to avoid passive event listener warnings
+  useEffect(() => {
+    if (isLoading || internalLoading || !isFadingBg) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = ''; // Cleanup on unmount
+    };
+  }, [isLoading, internalLoading, isFadingBg]);
+
   // Sequential Orchestration: 
   // When external isLoading becomes false, we first fade out the logo.
   // After logo fades, we trigger the background fade.
@@ -35,9 +48,6 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ isLoading }) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 1.0, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] bg-brand-bg flex items-center justify-center"
-          style={{ touchAction: 'none' }} // Prevents mobile scrolling behind the overlay
-          onWheel={(e) => e.preventDefault()} // Prevents mouse wheel scrolling behind the overlay
-          onTouchMove={(e) => e.preventDefault()} // Secondary mobile prevention
         >
           <AnimatePresence>
             {internalLoading && (
@@ -49,19 +59,17 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ isLoading }) => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="relative w-24 h-24 flex items-center justify-center"
               >
-                {/* Cinematic Background Glow (Behind Logo) */}
-                <div 
-                  className="absolute inset-0 w-[160%] h-[160%] left-[-30%] top-[-30%] animate-breathing-bg-glow pointer-events-none mix-blend-screen rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle at center, rgba(14, 165, 233, 0.5) 0%, rgba(14, 165, 233, 0.15) 30%, transparent 55%)'
-                  }}
-                />
-                
-                {/* Pure White Logo (Foreground) */}
-                <img
+                {/* Pure White Logo with Cinematic Breathing (Opacity) */}
+                <motion.img
                   src="/icon.png"
                   alt="Logia Logo"
                   className="w-full h-full object-contain relative z-10 pointer-events-none"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ 
+                    duration: 2.5, 
+                    repeat: Infinity, 
+                    ease: "easeInOut" 
+                  }}
                 />
               </motion.div>
             )}
