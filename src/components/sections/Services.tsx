@@ -16,6 +16,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const images = useRef<HTMLImageElement[]>([]);
   const currentFrameRef = useRef(1);
   
@@ -62,6 +63,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
       const canvas = canvasRef.current;
       if (canvas) {
         const context = canvas.getContext('2d', { alpha: false });
+        contextRef.current = context;
         const firstImg = images.current[1];
         if (context && firstImg) {
           drawFrame(context, canvas, firstImg);
@@ -143,36 +145,34 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
     const duration = Math.max((framesToTravel / (frameCount - 1)) * maxDuration, 300); // Minimum 300ms so it doesn't snap instantly
 
     const startTime = performance.now();
-    const middleFrame = Math.round(frameCount / 2);
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Smooth Easing function (easeInOutQuad)
-      // This curve provides the dramatic start/mid you like, but with a much smoother 
+      // This curve provides the dramatic start/mid you like, but with a much smoother
       // and less drastic deceleration at the tail end to prevent frame stuttering.
-      const ease = progress < 0.5 
-        ? 2 * progress * progress 
+      const ease = progress < 0.5
+        ? 2 * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
       const nextFrame = Math.round(startFrame + (targetFrame - startFrame) * ease);
-      
+
       // Update canvas if frame changed
       if (nextFrame !== currentFrameRef.current) {
         const canvas = canvasRef.current;
-        if (canvas) {
-          const context = canvas.getContext('2d', { alpha: false });
+        const context = contextRef.current;
+        if (canvas && context) {
           const img = images.current[nextFrame];
-          if (context && img && img.complete) {
+          if (img && img.complete && img.naturalWidth > 0) {
             drawFrame(context, canvas, img);
             currentFrameRef.current = nextFrame;
           }
         }
-        
-        // 3. Precision Text Sync: Swap text slightly earlier than the exact middle 
-        // to make it feel more synchronized with the leading edge of the visual transition
-        const swapFrameTrigger = Math.round(frameCount * 0.30); // Swaps at 30% instead of 40%
+
+        // Text Sync: Swap at visual midpoint of the animation so text and canvas stay in sync
+        const swapFrameTrigger = Math.round(frameCount * 0.50);
         const currentTargetSlide = currentFrameRef.current >= swapFrameTrigger ? 1 : 0;
         if (currentTargetSlide !== activeSlideRef.current) {
             activeSlideRef.current = currentTargetSlide;
@@ -204,10 +204,10 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
     // This makes fast-scrolling immune to desyncing.
     let newTargetSlide = targetSlideRef.current;
     
-    if (latest > 0.52) {
-        newTargetSlide = 1; // Passed halfway down, target AI
-    } else if (latest < 0.48) {
-        newTargetSlide = 0; // Passed halfway up, target Enterprise
+    if (latest > 0.42) {
+        newTargetSlide = 1; // Crossed ~42% scrolling down, target AI
+    } else if (latest < 0.30) {
+        newTargetSlide = 0; // Crossed ~30% scrolling up, target Enterprise
     }
 
     // If target changed due to fast scroll, immediately interrupt and reverse!
@@ -218,7 +218,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   });
 
   return (
-    <section id="services" ref={containerRef} className="relative h-[220vh] bg-brand-bg">
+    <section id="services" ref={containerRef} className="relative h-[200vh] bg-brand-bg">
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center">
         {/* Background Frame Sequence - Tuned to match Hero's cinematic tone */}
         <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">

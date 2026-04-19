@@ -44,43 +44,39 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    // OPTIMIZATION 2: Pre-render glowing particles to an offscreen canvas.
-    // shadowBlur is extremely expensive in a render loop on mobile. 
+    // OPTIMIZATION 2: Pre-render glowing particles to offscreen canvases.
+    // shadowBlur is extremely expensive in a render loop on mobile.
     // By pre-rendering the glow once, we just draw an image (drawImage) which is vastly faster.
-    const preRenderCanvas = document.createElement('canvas');
-    const pCtx = preRenderCanvas.getContext('2d');
-    
+
     // Create a dictionary to hold offscreen canvases for each color
     const glowCache: Record<string, HTMLCanvasElement> = {};
-    
-    if (pCtx) {
-        PARTICLE_COLORS.forEach(color => {
-            const glowCanvas = document.createElement('canvas');
-            // Size needs to accommodate the max particle size + shadow blur
-            // Max size = ~3.5. Shadow blur = size * 3 =~ 10.5. Total radius =~ 14. 
-            // Diameter = 28. Pad it to 40x40.
-            glowCanvas.width = 40;
-            glowCanvas.height = 40;
-            const gCtx = glowCanvas.getContext('2d');
-            
-            if (gCtx) {
-                const centerX = 20;
-                const centerY = 20;
-                // Pre-render logic for a standard "large" particle to scale later
-                const baseSize = 3; 
-                
-                gCtx.beginPath();
-                gCtx.arc(centerX, centerY, baseSize, 0, Math.PI * 2);
-                gCtx.fillStyle = color;
-                
-                gCtx.shadowBlur = baseSize * 3;
-                gCtx.shadowColor = color.substring(0, 7); // Hex without alpha
-                gCtx.fill();
-                gCtx.shadowBlur = 0;
-            }
-            glowCache[color] = glowCanvas;
-        });
-    }
+
+    PARTICLE_COLORS.forEach(color => {
+        const glowCanvas = document.createElement('canvas');
+        // Size needs to accommodate the max particle size + shadow blur
+        // Max size = ~3.5. Shadow blur = size * 3 =~ 10.5. Total radius =~ 14.
+        // Diameter = 28. Pad it to 40x40.
+        glowCanvas.width = 40;
+        glowCanvas.height = 40;
+        const gCtx = glowCanvas.getContext('2d');
+
+        if (gCtx) {
+            const centerX = 20;
+            const centerY = 20;
+            // Pre-render logic for a standard "large" particle to scale later
+            const baseSize = 3;
+
+            gCtx.beginPath();
+            gCtx.arc(centerX, centerY, baseSize, 0, Math.PI * 2);
+            gCtx.fillStyle = color;
+
+            gCtx.shadowBlur = baseSize * 3;
+            gCtx.shadowColor = color.substring(0, 7); // Hex without alpha
+            gCtx.fill();
+            gCtx.shadowBlur = 0;
+        }
+        glowCache[color] = glowCanvas;
+    });
 
 
     let rafId: number;
@@ -194,18 +190,19 @@ export const Methodology: React.FC = () => {
   });
 
   const [methodologyStage, setMethodologyStage] = useState(0);
+  const methodologyStageRef = useRef(0);
 
   useMotionValueEvent(smoothScroll, "change", (latest) => {
     let stage = 0;
-    // Tightly coupled pacing: Card 1 enters immediately as the title minimizes
-    if (latest < 0.05) stage = 0; // Title center
-    else if (latest < 0.15) stage = 1; // Title starts minimizing
-    else if (latest < 0.38) stage = 3; // Card 1 (Enters right on the heels of the title moving up)
-    else if (latest < 0.58) stage = 4; // Card 2
-    else if (latest < 0.78) stage = 5; // Card 3
-    else stage = 6; // Card 4
+    if (latest < 0.08) stage = 0;      // Title centered
+    else if (latest < 0.20) stage = 1; // Title minimizing
+    else if (latest < 0.40) stage = 2; // Card 1
+    else if (latest < 0.60) stage = 3; // Card 2
+    else if (latest < 0.80) stage = 4; // Card 3
+    else stage = 5;                    // Card 4
 
-    if (stage !== methodologyStage) {
+    if (stage !== methodologyStageRef.current) {
+      methodologyStageRef.current = stage;
       setMethodologyStage(stage);
     }
   });
@@ -213,7 +210,7 @@ export const Methodology: React.FC = () => {
   const isTitleMinimized = methodologyStage > 0;
 
   return (
-    <section id="methodology" ref={methodologyRef} className="h-[500vh] relative z-10 bg-brand-bg">
+    <section id="methodology" ref={methodologyRef} className="h-[400vh] relative z-10 bg-brand-bg">
       <div className="sticky top-0 h-[100dvh] flex items-center justify-center overflow-hidden">
         
         {/* Base Layer: Parallax Particles - Now Canvas Based with Drifting */}
@@ -282,7 +279,7 @@ export const Methodology: React.FC = () => {
           <div className="absolute inset-0 flex items-start justify-center pointer-events-none pt-[32dvh] md:pt-[35dvh]">
             <AnimatePresence mode="wait">
               {methodologyPoints.map((point, index) => {
-                const stage = index + 3;
+                const stage = index + 2;
                 const isLastPoint = index === methodologyPoints.length - 1;
                 
                 if (methodologyStage === stage || (isLastPoint && methodologyStage > stage)) {
