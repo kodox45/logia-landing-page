@@ -33,7 +33,7 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   // Preload images
   useEffect(() => {
     let loadedCount = 0;
-    const framePaths = Array.from({ length: frameCount }, (_, i) => `/frames/${String(i + 1).padStart(5, '0')}.png`);
+    const framePaths = Array.from({ length: frameCount }, (_, i) => `/frames/${String(i + 1).padStart(5, '0')}.webp`);
 
     const preloadImages = async () => {
       // Helper to load a single image
