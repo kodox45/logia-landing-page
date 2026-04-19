@@ -48,12 +48,17 @@ export const Contact: React.FC = () => {
 
           {/* Right Side: Contact Form */}
           <div className="lg:col-span-7">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <motion.div
+              initial={{ y: 30 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               className="dna-glass-card rounded-[2.5rem] p-8 md:p-12"
             >
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+              >
               <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
@@ -99,6 +104,7 @@ export const Contact: React.FC = () => {
                   </div>
                 </button>
               </form>
+              </motion.div>
             </motion.div>
           </div>
         </div>

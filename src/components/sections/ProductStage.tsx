@@ -26,12 +26,19 @@ const ProductCard: React.FC<{ product: ProductData; index: number }> = ({ produc
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ y: 40 }}
+      whileInView={{ y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="dna-glass-card rounded-[2rem] overflow-hidden flex flex-col lg:flex-row items-stretch min-h-[500px] group"
+      className="dna-glass-card rounded-[2rem] overflow-hidden group"
     >
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="flex-1 flex flex-col lg:flex-row items-stretch min-h-[500px]"
+      >
       {/* Content Side */}
       <div className={`flex-1 p-8 md:p-16 flex flex-col justify-center ${!isEven ? 'lg:order-2' : ''}`}>
         <div className="flex items-center gap-4 mb-8">
@@ -106,6 +113,7 @@ const ProductCard: React.FC<{ product: ProductData; index: number }> = ({ produc
           0{index + 1}
         </div>
       </div>
+      </motion.div>
     </motion.div>
   );
 };
