@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, useSpring } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, useSpring, useInView } from 'motion/react';
 import { methodologyPoints } from '../../data/methodology';
 
 // Optimization: Move static data outside component
@@ -21,6 +21,10 @@ interface ParticleData {
 
 const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // OPTIMIZATION 1: Pause animation when not in view to save CPU/Battery
+  const isInView = useInView(canvasRef, { margin: "100px" });
+  
   const particles = useMemo(() => {
     return Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random() * 100,
@@ -40,10 +44,55 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    // OPTIMIZATION 2: Pre-render glowing particles to an offscreen canvas.
+    // shadowBlur is extremely expensive in a render loop on mobile. 
+    // By pre-rendering the glow once, we just draw an image (drawImage) which is vastly faster.
+    const preRenderCanvas = document.createElement('canvas');
+    const pCtx = preRenderCanvas.getContext('2d');
+    
+    // Create a dictionary to hold offscreen canvases for each color
+    const glowCache: Record<string, HTMLCanvasElement> = {};
+    
+    if (pCtx) {
+        PARTICLE_COLORS.forEach(color => {
+            const glowCanvas = document.createElement('canvas');
+            // Size needs to accommodate the max particle size + shadow blur
+            // Max size = ~3.5. Shadow blur = size * 3 =~ 10.5. Total radius =~ 14. 
+            // Diameter = 28. Pad it to 40x40.
+            glowCanvas.width = 40;
+            glowCanvas.height = 40;
+            const gCtx = glowCanvas.getContext('2d');
+            
+            if (gCtx) {
+                const centerX = 20;
+                const centerY = 20;
+                // Pre-render logic for a standard "large" particle to scale later
+                const baseSize = 3; 
+                
+                gCtx.beginPath();
+                gCtx.arc(centerX, centerY, baseSize, 0, Math.PI * 2);
+                gCtx.fillStyle = color;
+                
+                gCtx.shadowBlur = baseSize * 3;
+                gCtx.shadowColor = color.substring(0, 7); // Hex without alpha
+                gCtx.fill();
+                gCtx.shadowBlur = 0;
+            }
+            glowCache[color] = glowCanvas;
+        });
+    }
+
+
     let rafId: number;
     let time = 0;
     
     const render = () => {
+      // Don't render if not visible!
+      if (!isInView) {
+         rafId = requestAnimationFrame(render);
+         return;
+      }
+
       const progress = scrollProgress.get();
       const { width, height } = canvas;
       time += 0.01;
@@ -68,19 +117,28 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
         // Accurate wrapping logic regardless of scroll speed
         finalY = ((finalY % wrapHeight) + wrapHeight) % wrapHeight - 100;
         
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(xPos, finalY, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity;
-        ctx.fill();
         
-        // Add subtle cinematic glow to larger particles
-        if (p.size > 1.5) {
-          ctx.shadowBlur = p.size * 3;
-          ctx.shadowColor = p.color.substring(0, 7); // Extract hex, remove alpha for shadow
-          ctx.fill();
-          ctx.shadowBlur = 0;
+        // Draw particle
+        ctx.globalAlpha = p.opacity;
+        
+        if (p.size > 1.5 && glowCache[p.color]) {
+             // Use pre-rendered glowing image
+             const scaleRatio = p.size / 3; // 3 is the baseSize we used in pre-render
+             const drawWidth = 40 * scaleRatio;
+             const drawHeight = 40 * scaleRatio;
+             ctx.drawImage(
+                 glowCache[p.color], 
+                 xPos - (drawWidth/2), 
+                 finalY - (drawHeight/2), 
+                 drawWidth, 
+                 drawHeight
+             );
+        } else {
+             // Standard small particle without expensive glow
+             ctx.beginPath();
+             ctx.arc(xPos, finalY, p.size, 0, Math.PI * 2);
+             ctx.fillStyle = p.color;
+             ctx.fill();
         }
       });
       
@@ -101,7 +159,7 @@ const ParallaxParticles: React.FC<{ scrollProgress: any }> = ({ scrollProgress }
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
     };
-  }, [particles, scrollProgress]);
+  }, [particles, scrollProgress, isInView]);
 
   return (
     <canvas 
