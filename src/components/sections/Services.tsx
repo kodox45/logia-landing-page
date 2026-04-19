@@ -36,21 +36,22 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
     const framePaths = Array.from({ length: frameCount }, (_, i) => `/frames/${String(i + 1).padStart(5, '0')}.png`);
 
     const preloadImages = async () => {
-      const loadPromises = framePaths.map((path, index) => {
+      // Helper to load a single image
+      const loadImage = (path: string, index: number) => {
         return new Promise<void>((resolve) => {
           const img = new Image();
           img.src = path;
           img.onload = () => {
-            images.current[index + 1] = img;
-            loadedCount++;
-            if (loadedCount === frameCount) resolve();
-            else resolve(); 
+            images.current[index] = img;
+            resolve();
           };
-          img.onerror = () => resolve(); 
+          img.onerror = () => resolve(); // Always resolve to prevent hanging
         });
-      });
+      };
 
-      await Promise.all(loadPromises);
+      // 1. CRITICAL PATH: Load ONLY the first frame to unblock the UI immediately
+      await loadImage(framePaths[0], 1);
+      
       setIsReady(true);
       if (onReady) onReady();
       
@@ -62,6 +63,26 @@ export const Services: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
           drawFrame(context, canvas, firstImg);
         }
       }
+
+      // 2. BACKGROUND TASK: Lazily load the remaining 85 frames sequentially
+      // We load them sequentially (or in small batches) so we don't clog the network
+      // and ensure earlier frames (which the user scrolls to first) are prioritized.
+      const loadRestOfFrames = async () => {
+        // Load in batches of 3 to balance speed and network congestion
+        const batchSize = 3;
+        for (let i = 1; i < frameCount; i += batchSize) {
+          const batchPromises = [];
+          for (let j = 0; j < batchSize && i + j < frameCount; j++) {
+             const frameIndex = i + j;
+             // images array is 1-indexed based on your existing logic (index + 1)
+             batchPromises.push(loadImage(framePaths[frameIndex], frameIndex + 1));
+          }
+          await Promise.all(batchPromises);
+        }
+      };
+
+      // Execute background loading without awaiting it here
+      loadRestOfFrames();
     };
 
     preloadImages();
