@@ -310,10 +310,10 @@ export const Contact: React.FC = () => {
                         <button
                           type="submit"
                           disabled={isLoading}
-                          className="flex-1 group relative overflow-hidden rounded-xl bg-white p-px transition-all hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex-1 group relative rounded-xl ring-1 ring-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Initiate Collaboration"
                         >
-                          <div className="relative flex items-center justify-center gap-3 bg-brand-bg group-hover:bg-transparent px-8 py-4 rounded-[11px] transition-all duration-300">
+                          <div className="relative flex items-center justify-center gap-3 bg-brand-bg group-hover:bg-white px-8 py-4 rounded-xl transition-all duration-300">
                             {isLoading ? (
                               <>
                                 <Loader2 className="w-4 h-4 text-white animate-spin" />
@@ -322,7 +322,7 @@ export const Contact: React.FC = () => {
                             ) : (
                               <>
                                 <span className="text-white group-hover:text-brand-bg font-bold tracking-tight">Initiate Collaboration</span>
-                                <ArrowRight className="w-5 h-5 text-brand-accent group-hover:text-brand-bg transition-transform group-hover:translate-x-1" />
+                                <ArrowRight className="w-5 h-5 text-brand-accent group-hover:text-brand-bg transition-all duration-300 group-hover:translate-x-1" />
                               </>
                             )}
                           </div>
