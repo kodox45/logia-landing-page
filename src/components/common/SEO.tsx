@@ -13,8 +13,8 @@ export const SEO: React.FC<SEOProps> = ({
   title = "Logia Initiative | AI-Driven Software Engineering",
   description = "Developing high-end software through the synergy of Humans and Agentic AI. Enterprise Audit, Agentic Engine, and Custom AI Solutions.",
   keywords = "AI, Agentic AI, Software Engineering, Enterprise AI, AI Audit, Logia Initiative",
-  image = "/og-image.jpg",
-  url = "https://logia.initiative"
+  image = "/Logo.png",
+  url = "https://logia-initiative.com"
 }) => {
   return (
     <Helmet>
