@@ -3,32 +3,40 @@ import { Linkedin, Github, ArrowRight } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#030304] border-t border-white/5 pt-24 pb-12 relative z-10 overflow-hidden">
+    <footer className="bg-[#030304] border-t border-white/5 pt-16 pb-10 relative z-10 overflow-hidden">
       {/* Subtle Background Glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-brand-accent/20 to-transparent" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-12">
           {/* Brand Column */}
-          <div className="lg:col-span-5 space-y-8">
+          <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2">
-              <img 
-                src="/Logo.png" 
-                alt="Logia Initiative" 
-                className="h-7 brightness-0 invert" 
+              <img
+                src="/Logo.png"
+                alt="Logia Initiative"
+                className="h-7 brightness-0 invert"
               />
             </div>
             <p className="text-brand-gray text-base leading-relaxed max-w-sm font-light">
               AI-Driven Software Engineering Company.<br />
               Developing high-end software through the synergy of Humans and Agentic AI.
             </p>
-            <div className="flex space-x-5 items-center">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-gray hover:text-white hover:border-brand-accent/50 hover:bg-brand-accent/5 transition-all duration-300" aria-label="LinkedIn">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-gray hover:text-white hover:border-brand-accent/50 hover:bg-brand-accent/5 transition-all duration-300" aria-label="GitHub">
-                <Github className="w-5 h-5" />
-              </a>
+            <div className="space-y-3">
+              <div className="flex space-x-5 items-center">
+                <a href="https://www.linkedin.com/company/logia-initiative/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-gray hover:text-white hover:border-brand-accent/50 hover:bg-brand-accent/5 transition-all duration-300" aria-label="LinkedIn">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+                <a href="https://github.com/kodox45" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-gray hover:text-white hover:border-brand-accent/50 hover:bg-brand-accent/5 transition-all duration-300" aria-label="GitHub">
+                  <Github className="w-5 h-5" />
+                </a>
+              </div>
+              <div className="space-y-0.5">
+                <a href="mailto:logiainitiative@gmail.com" className="text-brand-gray/70 hover:text-brand-accent text-xs font-light transition-colors block">
+                  logiainitiative@gmail.com
+                </a>
+                <p className="text-brand-gray/30 text-xs font-light">South Tangerang, Indonesia</p>
+              </div>
             </div>
           </div>
 
@@ -51,11 +59,16 @@ export const Footer: React.FC = () => {
             <div className="space-y-6">
               <h4 className="text-white text-xs font-bold uppercase tracking-[0.2em]">Company</h4>
               <ul className="space-y-4">
-                {['About Us', 'Methodology', 'Investors', 'Contact'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-brand-gray hover:text-brand-accent text-sm transition-colors font-light flex items-center group">
+                {[
+                  { label: 'About Us', href: '#about' },
+                  { label: 'Methodology', href: '#methodology' },
+                  { label: 'Market', href: '#market' },
+                  { label: 'Contact', href: '#contact' },
+                ].map((item) => (
+                  <li key={item.label}>
+                    <a href={item.href} className="text-brand-gray hover:text-brand-accent text-sm transition-colors font-light flex items-center group">
                       <span className="w-0 group-hover:w-2 h-px bg-brand-accent mr-0 group-hover:mr-2 transition-all duration-300" />
-                      {item}
+                      {item.label}
                     </a>
                   </li>
                 ))}
@@ -85,7 +98,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-[10px] font-mono text-brand-gray/40 uppercase tracking-widest">
             &copy; 2026 Logia Initiative. All Rights Reserved.
           </div>
